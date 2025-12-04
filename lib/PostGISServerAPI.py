@@ -205,6 +205,10 @@ class PostGISServerConnection():
             str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_DATA)
             return str_error, data
         data = response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_DATA]
+        if not data is None:
+            if isinstance(data, list):
+                if len(data) == 0:
+                    data = None
         return str_error, data
 
     def login(self, url, email, password):
