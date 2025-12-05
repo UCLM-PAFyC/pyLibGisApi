@@ -23,6 +23,7 @@ URL_USERS_SUFFIX = '/api/users'
 URL_REGISTER_SUFFIX = '/api/auth/register'
 URL_PROJECTS_SUFFIX = '/api/projects'
 URL_DB_SQL = '/api/db/sql'
+URL_PROJECTS_USERS_SUFFIX = '/api/projects/users'
 
 LOGIN_TAG_EMAIL = 'email'
 LOGIN_TAG_PASSWORD = 'password'
@@ -43,6 +44,10 @@ PROJECT_TYPE_DEFAULT = 'default'
 PROJECT_DATE_TIME_FORMAT ='yyyy-MM-dd HH:mm:ss'
 PROJECT_TAG_ID = 'id'
 PROJECT_SCHEMA_PREFIX = 'project_'
+PROJECT_TAG_USERS = 'users'
+PROJECT_TAG_USERS_ID = 'id'
+PROJECT_TAG_USERS_NAME = 'name'
+PROJECT_TAG_USERS_ROLE = 'role'
 
 REGISTER_TAG_NAME = 'name'
 REGISTER_TAG_EMAIL = 'email'
@@ -54,11 +59,11 @@ USERS_TAG_EMAIL = 'email'
 USERS_TAG_ID = 'id'
 USER_ADMIN_NAME = 'Administrador'
 
-ROL_ADMIN = 'Admin'
-ROL_OWNER = 'Owner'
-ROL_EDITOR = 'Editor'
-ROL_USER = 'User'
-roles=[ROL_OWNER, ROL_ADMIN, ROL_EDITOR, ROL_USER]
+ROLE_ADMIN = 'admin'
+ROLE_OWNER = 'owner'
+ROLE_EDITOR = 'editor'
+ROLE_USER = 'user'
+roles=[ROLE_OWNER, ROLE_ADMIN, ROLE_EDITOR, ROLE_USER]
 
 DB_TAG_SQL_COMMAND = "sql_command"
 DB_TAG_PROJECT_ID = "project_id"

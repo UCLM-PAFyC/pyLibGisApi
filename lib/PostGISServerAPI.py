@@ -28,6 +28,39 @@ class PostGISServerConnection():
         self.user = None
         self.password = None
 
+    def add_user_to_project(self, project_id, user_id, role):
+        str_error = ''
+        data = None
+        str_error = ''
+        if self.url is None:
+            str_error = 'url is none. Connect before'
+            return str_error
+        if self.token is None:
+            str_error = 'token is none. Connect before'
+            return str_error
+        url_get = self.url + defs_server_api.URL_PROJECTS_USERS_SUFFIX + '?project_id=' + str(project_id)
+        url_get += ('&user_id=' + str(user_id))
+        url_get += ('&role=' + role)
+        payload = {}
+        headers_as_dict = {}
+        # headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_DEFAULT_VALUE
+        headers_as_dict[defs_server_api.HEADERS_TAG_AUTHORIZATION] = (defs_server_api.HEADERS_TAG_AUTHORIZATION_BEARER
+                                                                      + self.token)
+        # headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
+        headers = headers_as_dict
+        response = requests.request("POST", url_get, headers=headers, data=payload)#, data=payload)
+        if response.status_code == 400:
+            str_error = 'post request failed: not found'
+            return str_error
+        response_text_as_dict = json.loads(response.text)
+        if not response.ok:
+            if not defs_server_api.RESPONSE_TEXT_TAG_MESSAGE in response_text_as_dict:
+                str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_MESSAGE)
+                return str_error
+            str_error = 'get request failed: {}'.format(response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_MESSAGE])
+            return str_error
+        return str_error
+
     def create_project(self, name, description, start_date, end_date, type):
         str_error = ''
         if self.url is None:
@@ -297,6 +330,41 @@ class PostGISServerConnection():
                 return str_error, project
         return str_error, project
 
+    def get_project_data(self, project_id):
+        str_error = ''
+        data = None
+        str_error = ''
+        if self.url is None:
+            str_error = 'url is none. Connect before'
+            return str_error, data
+        if self.token is None:
+            str_error = 'token is none. Connect before'
+            return str_error, data
+        url_get = self.url + defs_server_api.URL_PROJECTS_SUFFIX + '/' + str(project_id)
+        payload = {}
+        headers_as_dict = {}
+        # headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_DEFAULT_VALUE
+        headers_as_dict[defs_server_api.HEADERS_TAG_AUTHORIZATION] = (defs_server_api.HEADERS_TAG_AUTHORIZATION_BEARER
+                                                                      + self.token)
+        headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
+        headers = headers_as_dict
+        response = requests.request("GET", url_get, headers=headers, data=payload)#, data=payload)
+        if response.status_code == 400:
+            str_error = 'post request failed: not found'
+            return str_error, data
+        response_text_as_dict = json.loads(response.text)
+        if not response.ok:
+            if not defs_server_api.RESPONSE_TEXT_TAG_MESSAGE in response_text_as_dict:
+                str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_MESSAGE)
+                return str_error, data
+            str_error = 'get request failed: {}'.format(response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_MESSAGE])
+            return str_error, data
+        if not defs_server_api.RESPONSE_TEXT_TAG_DATA in response_text_as_dict:
+            str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_DATA)
+            return str_error, data
+        data = response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_DATA]
+        return str_error, data
+
     def get_project_names(self):
         str_error = ''
         project_names = []
@@ -335,7 +403,6 @@ class PostGISServerConnection():
             return str_error, role
         role = project[defs_server_api.PROJECTS_TAG_ROLE]
         return str_error, role
-
 
     def get_projects(self):
         str_error = ''
