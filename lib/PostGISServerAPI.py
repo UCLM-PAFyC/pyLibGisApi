@@ -27,6 +27,8 @@ class PostGISServerConnection():
         self.url = None
         self.user = None
         self.password = None
+        self.layers_group_id_by_name = None # dict
+        self.layers_groups_id_by_email = None # dict
 
     def add_user_to_project(self, project_id, user_id, role):
         str_error = ''
@@ -38,9 +40,9 @@ class PostGISServerConnection():
         if self.token is None:
             str_error = 'token is none. Connect before'
             return str_error
-        url_get = self.url + defs_server_api.URL_PROJECTS_USERS_SUFFIX + '?project_id=' + str(project_id)
-        url_get += ('&user_id=' + str(user_id))
-        url_get += ('&role=' + role)
+        url_post = self.url + defs_server_api.URL_PROJECTS_USERS_SUFFIX + '?project_id=' + str(project_id)
+        url_post += ('&user_id=' + str(user_id))
+        url_post += ('&role=' + role)
         payload = {}
         headers_as_dict = {}
         # headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_DEFAULT_VALUE
@@ -48,7 +50,7 @@ class PostGISServerConnection():
                                                                       + self.token)
         # headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
         headers = headers_as_dict
-        response = requests.request("POST", url_get, headers=headers, data=payload)#, data=payload)
+        response = requests.request("POST", url_post, headers=headers, data=payload)#, data=payload)
         if response.status_code == 400:
             str_error = 'post request failed: not found'
             return str_error
@@ -60,6 +62,50 @@ class PostGISServerConnection():
             str_error = 'get request failed: {}'.format(response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_MESSAGE])
             return str_error
         return str_error
+
+    def create_layers_group(self, project_id, layers_group_as_dict):
+        str_error = ''
+        if self.url is None:
+            str_error = 'url is none. Connect before'
+            return str_error
+        if self.token is None:
+            str_error = 'token is none. Connect before'
+            return str_error
+        if not isinstance(project_id, int):
+            str_error = 'project_id must be an integer'
+            return str_error
+        if not isinstance(layers_group_as_dict, dict):
+            str_error = 'layers_group_as_dict must be a dictionary'
+            return str_error
+        url_post = self.url + defs_server_api.URL_LAYERS_GROUPS + '/' + str(project_id)
+        payload = json.dumps(layers_group_as_dict)
+        headers_as_dict = {}
+        headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_DEFAULT_VALUE
+        headers_as_dict[defs_server_api.HEADERS_TAG_AUTHORIZATION] = (defs_server_api.HEADERS_TAG_AUTHORIZATION_BEARER
+                                                                      + self.token)
+        # headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
+        # headers = json.dumps(headers_as_dict)
+        headers = headers_as_dict
+        response = requests.request("POST", url_post, headers=headers, data=payload)#, data=payload)
+        if response.status_code == 400:
+            str_error = 'post request failed: not found'
+            return str_error
+        response_text_as_dict = json.loads(response.text)
+        if not response.ok:
+            if not defs_server_api.RESPONSE_TEXT_TAG_MESSAGE in response_text_as_dict:
+                str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_MESSAGE)
+                return str_error
+            str_error = 'post request failed: {}'.format(response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_MESSAGE])
+            return str_error
+        if not defs_server_api.RESPONSE_TEXT_TAG_DATA in response_text_as_dict:
+            str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_DATA)
+            return str_error
+        str_error = self.get_layers_groups(project_id)
+        if str_error:
+            str_error = ('Creating layers group, error:\n{}'.format(str_error))
+            return str_error
+        return str_error
+
 
     def create_project(self, name, description, start_date, end_date, type):
         str_error = ''
@@ -89,7 +135,7 @@ class PostGISServerConnection():
         if type.casefold() != defs_server_api.PROJECT_TYPE_DEFAULT.casefold():
             str_error = ('type must be: {}'.format(defs_server_api.PROJECT_TYPE_DEFAULT))
             return str_error
-        url_get = self.url + defs_server_api.URL_PROJECTS_SUFFIX
+        url_post = self.url + defs_server_api.URL_PROJECTS_SUFFIX
         payload_as_dict = {}
         payload_as_dict[defs_server_api.PROJECT_TAG_NAME] = name
         payload_as_dict[defs_server_api.PROJECT_TAG_DESCRIPTION] = description
@@ -104,7 +150,7 @@ class PostGISServerConnection():
         headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
         # headers = json.dumps(headers_as_dict)
         headers = headers_as_dict
-        response = requests.request("POST", url_get, headers=headers, data=payload)#, data=payload)
+        response = requests.request("POST", url_post, headers=headers, data=payload)#, data=payload)
         if response.status_code == 400:
             str_error = 'post request failed: not found'
             return str_error
@@ -154,8 +200,8 @@ class PostGISServerConnection():
         if project is None:
             str_error = ('Not exists project: {}'.format(name))
             return str_error
-        url_get = self.url + defs_server_api.URL_PROJECTS_SUFFIX
-        url_get_with_parameter = url_get + '/' + str(project[defs_server_api.PROJECTS_TAG_ID])
+        url_delete = self.url + defs_server_api.URL_PROJECTS_SUFFIX
+        url_get_with_parameter = url_delete + '/' + str(project[defs_server_api.PROJECTS_TAG_ID])
         payload = ""
         headers_as_dict = {}
         headers_as_dict[defs_server_api.HEADERS_TAG_AUTHORIZATION] = (defs_server_api.HEADERS_TAG_AUTHORIZATION_BEARER
@@ -198,7 +244,7 @@ class PostGISServerConnection():
             if not isinstance(sql, str):
                 str_error = 'sql must be a string'
                 return str_error, data
-        url_get = self.url + defs_server_api.URL_DB_SQL
+        url_post = self.url + defs_server_api.URL_DB_SQL
         headers_as_dict = {}
         headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_DEFAULT_VALUE
         headers_as_dict[defs_server_api.HEADERS_TAG_AUTHORIZATION] = (defs_server_api.HEADERS_TAG_AUTHORIZATION_BEARER
@@ -219,7 +265,7 @@ class PostGISServerConnection():
         payload_as_dict[defs_server_api.DB_TAG_SQL_COMMAND] = sql_sentence
         payload_as_dict[defs_server_api.DB_TAG_PROJECT_ID] = str(project_id)
         payload = json.dumps(payload_as_dict)
-        response = requests.request("POST", url_get, headers=headers, data=payload)  # , data=payload)
+        response = requests.request("POST", url_post, headers=headers, data=payload)  # , data=payload)
         if response.status_code == 400:
             str_error = 'post request failed: not found'
             return str_error, data
@@ -263,7 +309,7 @@ class PostGISServerConnection():
             # 'http:///no.scheme.com/math/12345.png'
             str_error = ('url is not a valid value:\n{}'.format(url))
             return str_error
-        url_login = url + defs_server_api.URL_LOGIN_SUFFIX
+        url_post = url + defs_server_api.URL_LOGIN_SUFFIX
         if not isinstance(email, str):
             str_error = 'email must be a string'
             return str_error
@@ -283,7 +329,7 @@ class PostGISServerConnection():
         headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
         # headers = json.dumps(headers_as_dict)
         headers = headers_as_dict
-        response = requests.request("POST", url_login, headers=headers, data=payload)
+        response = requests.request("POST", url_post, headers=headers, data=payload)
         if response.status_code == 400:
             str_error = 'post request failed: not found'
             return str_error
@@ -320,6 +366,70 @@ class PostGISServerConnection():
                 exists_project = True
                 return str_error, exists_project
         return str_error, exists_project
+
+    def get_layers_groups(self, project_id):
+        str_error = ''
+        if self.url is None:
+            str_error = 'url is none. Connect before'
+            return str_error
+        if self.token is None:
+            str_error = 'token is none. Connect before'
+            return str_error
+        if not isinstance(project_id, int):
+            str_error = 'project_id must be an integer'
+            return str_error
+        url_get = self.url + defs_server_api.URL_LAYERS_GROUPS + '/' + str(project_id)
+        payload = {}
+        headers_as_dict = {}
+        # headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_DEFAULT_VALUE
+        headers_as_dict[defs_server_api.HEADERS_TAG_AUTHORIZATION] = (defs_server_api.HEADERS_TAG_AUTHORIZATION_BEARER
+                                                                      + self.token)
+        headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
+        # headers = json.dumps(headers_as_dict)
+        headers = headers_as_dict
+        response = requests.request("GET", url_get, headers=headers, data=payload)#, data=payload)
+        if response.status_code == 400:
+            str_error = 'post request failed: not found'
+            return str_error
+        response_text_as_dict = json.loads(response.text)
+        if not response.ok:
+            if not defs_server_api.RESPONSE_TEXT_TAG_MESSAGE in response_text_as_dict:
+                str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_MESSAGE)
+                return str_error
+            str_error = 'post request failed: {}'.format(response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_MESSAGE])
+            return str_error
+        if not defs_server_api.RESPONSE_TEXT_TAG_DATA in response_text_as_dict:
+            str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_DATA)
+            return str_error
+        if not defs_server_api.RESPONSE_TEXT_TAG_DATA in response_text_as_dict:
+            str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_DATA)
+            return str_error
+        data = response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_DATA]
+        if self.layers_group_id_by_name is not None:
+            del self.layers_group_id_by_name
+            self.layers_group_id_by_name = None
+        if bool(self.layers_group_id_by_name):
+            del self.layers_group_id_by_name
+            self.layers_group_id_by_name = None
+        self.layers_group_id_by_name = {}
+        for layers_group in data:
+            name = layers_group[defs_server_api.LAYERS_GROUPS_TAG_NAME]
+            id = layers_group[defs_server_api.LAYERS_GROUPS_TAG_ID]
+            self.layers_group_id_by_name[name] = id
+        return str_error
+
+    def get_layers_group_id_by_name(self, project_id, layers_group_name):
+        str_error = ''
+        id = None
+        if self.layers_group_id_by_name is None:
+            str_error = self.get_layers_groups(project_id)
+            if str_error:
+                return str_error, id
+        if not layers_group_name in self.layers_group_id_by_name:
+            str_error = ('Not exists layers group: {}'.format(layers_group_name))
+            return str_error, id
+        id = self.layers_group_id_by_name[layers_group_name]
+        return str_error, id
 
     def get_project_by_name(self, project_name):
         str_error = ''
@@ -505,7 +615,7 @@ class PostGISServerConnection():
             # 'http:///no.scheme.com/math/12345.png'
             str_error = ('url is not a valid value:\n{}'.format(url))
             return str_error
-        url_register = url + defs_server_api.URL_REGISTER_SUFFIX
+        url_post = url + defs_server_api.URL_REGISTER_SUFFIX
         if not isinstance(name, str):
             str_error = 'name must be a string'
             return str_error
@@ -529,7 +639,7 @@ class PostGISServerConnection():
         headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
         # headers = json.dumps(headers_as_dict)
         headers = headers_as_dict
-        response = requests.request("POST", url_register, headers=headers, data=payload)
+        response = requests.request("POST", url_post, headers=headers, data=payload)
         if response.status_code == 400:
             str_error = 'post request failed: not found'
             return str_error
@@ -571,8 +681,8 @@ class PostGISServerConnection():
         if self.token is None:
             str_error = 'token is none. Connect before'
             return str_error
-        url_get = self.url + defs_server_api.URL_PROJECTS_USERS_SUFFIX + '/' + str(project_id)
-        url_get += ('/' + str(user_id))
+        url_delete = self.url + defs_server_api.URL_PROJECTS_USERS_SUFFIX + '/' + str(project_id)
+        url_delete += ('/' + str(user_id))
         payload = {}
         headers_as_dict = {}
         # headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_DEFAULT_VALUE
@@ -580,7 +690,7 @@ class PostGISServerConnection():
                                                                       + self.token)
         # headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
         headers = headers_as_dict
-        response = requests.request("DELETE", url_get, headers=headers, data=payload)#, data=payload)
+        response = requests.request("DELETE", url_delete, headers=headers, data=payload)#, data=payload)
         if response.status_code == 400:
             str_error = 'post request failed: not found'
             return str_error

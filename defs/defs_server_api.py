@@ -24,6 +24,7 @@ URL_REGISTER_SUFFIX = '/api/auth/register'
 URL_PROJECTS_SUFFIX = '/api/projects'
 URL_DB_SQL = '/api/db/sql'
 URL_PROJECTS_USERS_SUFFIX = '/api/projects/users'
+URL_LAYERS_GROUPS = '/api/layers/groups'
 
 LOGIN_TAG_EMAIL = 'email'
 LOGIN_TAG_PASSWORD = 'password'
@@ -74,3 +75,5 @@ roles=[ROLE_OWNER, ROLE_ADMIN, ROLE_EDITOR, ROLE_USER]
 DB_TAG_SQL_COMMAND = "sql_command"
 DB_TAG_PROJECT_ID = "project_id"
 
+LAYERS_GROUPS_TAG_NAME = 'name'
+LAYERS_GROUPS_TAG_ID = 'group_id'
