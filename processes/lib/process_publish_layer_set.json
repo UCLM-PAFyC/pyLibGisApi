@@ -1,0 +1,74 @@
+{
+    "name": "Publish Layer Set",
+    "contributions": {
+        "methodology": [
+            "David Hernández López, david.hernandez@uclm.es"
+        ],
+        "software": [
+            "David Hernández López, david.hernandez@uclm.es"
+        ]
+    },
+    "src": {
+		"class": "pyLibGisApi.lib.PostGISServerAPI",
+		"method": "process_publish_layer_set"
+	},
+    "description": "A process to upload layer set",
+    "doc": "",
+    "parameters": [
+        {
+            "label": "Layer Set",
+            "argparser": "",
+            "description": "Layer Set, selected layers from a GPKG",
+            "mandatory": true,
+            "output": false,
+            "value": {
+                "file_path": "F:/2025_Inspectia/juanra/example_data/products/Belinchon.gpkg",
+                "layer_names": ["puntos_belinchon", "lineas_belinchon", "poligonos_belinchon", "Orto_Belinchon"]
+            },
+            "type": "layer_set",
+            "file_mode": "read",
+            "domain": [
+                ".gpkg"
+            ],
+            "output_format": "{}"
+        },
+        {
+            "label": "CRS",
+            "argparser": "",
+            "description": "A valid CRS identifier (EPSG:25830+5782, EPSG:25830, ...) for replace the internal CRS of layers. Empty for no use",
+            "mandatory": true,
+            "output": false,
+            "value": "EPSG:25830",
+            "type": "string",
+            "output_format": "{:>s}"
+        },
+        {
+            "label": "Minimum zoom",
+            "argparser": "",
+            "description": "Minimum zoom",
+            "mandatory": true,
+            "output": false,
+            "value": 10,
+            "type": "integer",
+            "domain": [
+                1,
+                25
+            ],
+            "output_format": "{:10d}"
+        },
+        {
+            "label": "Maximum zoom",
+            "argparser": "",
+            "description": "Minimum zoom",
+            "mandatory": true,
+            "output": false,
+            "value": 25,
+            "type": "integer",
+            "domain": [
+                1,
+                25
+            ],
+            "output_format": "{:10d}"
+        }
+    ]
+}

@@ -17,7 +17,7 @@ def email_validator(email):
                r"@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$")
     return re.match(pattern, email) is not None
 
-class PostGISServerConnection():
+class PostGISServerAPI():
     def __init__(self,
                  settings):
         self.settings = settings
@@ -702,6 +702,12 @@ class PostGISServerConnection():
             usermail = user[defs_server_api.USERS_TAG_EMAIL]
             self.user_by_email[usermail] = user
         return str_error
+
+    def process_publish_layer_set(self,
+                                  process,
+                                  dialog = None):
+        yo = 1
+        return
 
     def register(self, url, name, email, password):
         str_error = ''
