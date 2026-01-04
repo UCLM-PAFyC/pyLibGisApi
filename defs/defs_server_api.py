@@ -32,6 +32,7 @@ URL_FILE_MANAGER_FOLDER_SUFFIX = '/api/filemanager/folder'
 URL_FILE_MANAGER_UPLOADS = '/api/filemanager/uploads'
 URL_FILE_MANAGER_DELETE = '/api/filemanager/delete'
 URL_FILE_MANAGER_MOVE = '/api/filemanager/move'
+URL_PRODUCT_PUBLISH = '/api/products'
 
 LOGIN_TAG_EMAIL = 'email'
 LOGIN_TAG_PASSWORD = 'password'

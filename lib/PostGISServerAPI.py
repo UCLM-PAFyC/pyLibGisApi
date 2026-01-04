@@ -936,6 +936,45 @@ class PostGISServerAPI():
         file_path_in_uploads_folder = '/' + defs_server_api.UPLOADS_FOLDER + '/' + file_basename
         file_path_in_target_folder = '/' + upload_folder + '/' + file_basename
         target_folder = '/' + upload_folder
+        if not defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_LAYER_PARAMETER_LAYERS in layer_set_as_dict:
+            str_error = ('Process: {}, in parameter: {} not exists parameter: {}'.
+                         format(name, defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_PARAMETER_LAYERS_SET,
+                                defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_LAYER_PARAMETER_LAYERS))
+            return str_error, end_date_time, log
+        layers = layer_set_as_dict[defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_LAYER_PARAMETER_LAYERS]
+        if not isinstance(layers, list):
+            str_error = ('Process: {}, in parameter: {} parameter: {} must be a list'.
+                         format(name, defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_PARAMETER_LAYERS_SET,
+                                defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_LAYER_PARAMETER_LAYERS))
+            return str_error, end_date_time, log
+        if len(layers) == 0:
+            str_error = ('Process: {}, in parameter: {} parameter: {} is an empty list'.
+                         format(name, defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_PARAMETER_LAYERS_SET,
+                                defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_LAYER_PARAMETER_LAYERS))
+            return str_error, end_date_time, log
+        for i in range(len(layers)):
+            if not isinstance(layer, list):
+                str_error = ('Process: {}, in parameter: {} parameter: {} in position: {} must be a list'.
+                             format(name, defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_PARAMETER_LAYERS_SET,
+                                    str(i+1), defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_LAYER_PARAMETER_LAYERS))
+                return str_error, end_date_time, log
+            layer = layers[i]
+            name = None
+            title = None
+            position = None
+            crs = None
+            date = None
+            minimum_zoom = None
+            maximum_zoom = None
+            layer_type = None
+            layer_style = None
+            group_name = None
+            for j in range(len(layer)):
+                yo = 1
+
+            yo = 1
+
+
 
         # error upload
         # # if exists file in uploads folder, first remove it
@@ -953,23 +992,23 @@ class PostGISServerAPI():
         #     return str_error, end_date_time, log
         # error upload
 
-        # if exists file in target folder, first remove it
-        if file_basename in files_in_target_folder:
-            file_path_to_remove = '/' + upload_folder + '/' + file_basename
-            str_error = self.remove_folder_or_file(self.current_project_id, file_path_to_remove)
-            if str_error:
-                str_error = ('Process: {}, for project: {}, removing:\n{}\nerror:\n{}'.
-                             format(name, str(project_id), file_path_to_remove, str_error))
-                return str_error, end_date_time, log
-
-        # move file to target folder
-        str_error = self.move_folder_or_file(self.current_project_id, file_path_in_uploads_folder,
-                                             target_folder)
-        if str_error:
-            str_error = ('Process: {}, for project: {}, moving from:\n{}\nto:\n{}\nerror:\n{}'.
-                         format(name, str(project_id), file_path_in_uploads_folder,
-                                file_path_in_target_folder, str_error))
-            return str_error, end_date_time, log
+        # # if exists file in target folder, first remove it
+        # if file_basename in files_in_target_folder:
+        #     file_path_to_remove = '/' + upload_folder + '/' + file_basename
+        #     str_error = self.remove_folder_or_file(self.current_project_id, file_path_to_remove)
+        #     if str_error:
+        #         str_error = ('Process: {}, for project: {}, removing:\n{}\nerror:\n{}'.
+        #                      format(name, str(project_id), file_path_to_remove, str_error))
+        #         return str_error, end_date_time, log
+        #
+        # # move file to target folder
+        # str_error = self.move_folder_or_file(self.current_project_id, file_path_in_uploads_folder,
+        #                                      target_folder)
+        # if str_error:
+        #     str_error = ('Process: {}, for project: {}, moving from:\n{}\nto:\n{}\nerror:\n{}'.
+        #                  format(name, str(project_id), file_path_in_uploads_folder,
+        #                         file_path_in_target_folder, str_error))
+        #     return str_error, end_date_time, log
 
         # publicar
 

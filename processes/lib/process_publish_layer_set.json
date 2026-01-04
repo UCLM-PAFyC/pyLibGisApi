@@ -62,7 +62,7 @@
                         {
                             "label": "CRS",
                             "argparser": "",
-                            "description": "A valid CRS identifier (EPSG:25830+5782, EPSG:25830, ...) for replace the internal CRS of layers. Empty for no use",
+							"description": "A valid CRS identifier, not compound, (EPSG:25830, ...) for replace the internal CRS of layers. Empty for no use",
                             "mandatory": true,
                             "output": false,
                             "value": "None",
@@ -137,7 +137,37 @@
                             "value": "Belinchón",
                             "type": "string",
                             "output_format": "{:s}"
-                        }
+                        },
+                        {
+                            "label": "Description",
+                            "argparser": "",
+                            "description": "Layer description",
+                            "mandatory": true,
+                            "output": true,
+                            "value": "Capa de polígonos de Belinchón",
+                            "type": "string",
+                            "output_format": "{:s}"
+                        },
+						{
+							"label": "Layer type",
+							"argparser": "",
+							"description": "Layer type: vector, raster, ...",
+							"mandatory": true,
+							"output": false,
+							"value": "vector",
+							"type": "string",
+							"output_format": "{:s}"
+						},
+						{
+							"label": "Layer style",
+							"argparser": "",
+							"description": "Layer style, or empty",
+							"mandatory": true,
+							"output": false,
+							"value": "poligonos_belinchon",
+							"type": "string",
+							"output_format": "{:s}"
+						}
                     ],
                     [
                         {
@@ -177,7 +207,7 @@
                         {
                             "label": "CRS",
                             "argparser": "",
-                            "description": "A valid CRS identifier (EPSG:25830+5782, EPSG:25830, ...) for replace the internal CRS of layers. Empty for no use",
+							"description": "A valid CRS identifier, not compound, (EPSG:25830, ...) for replace the internal CRS of layers. Empty for no use",
                             "mandatory": true,
                             "output": false,
                             "value": "None",
@@ -252,7 +282,37 @@
                             "value": "Belinchón",
                             "type": "string",
                             "output_format": "{:s}"
-                        }
+                        },
+                        {
+                            "label": "Description",
+                            "argparser": "",
+                            "description": "Layer description",
+                            "mandatory": true,
+                            "output": true,
+                            "value": "Capa de PNOA MA de Belinchón",
+                            "type": "string",
+                            "output_format": "{:s}"
+                        },
+						{
+							"label": "Layer type",
+							"argparser": "",
+							"description": "Layer type: vector, raster, ...",
+							"mandatory": true,
+							"output": false,
+							"value": "raster",
+							"type": "string",
+							"output_format": "{:s}"
+						},
+						{
+							"label": "Layer style",
+							"argparser": "",
+							"description": "Layer style, or empty",
+							"mandatory": true,
+							"output": false,
+							"value": "pnoa_ma",
+							"type": "string",
+							"output_format": "{:s}"
+						}
                     ]
                 ]
             },
@@ -299,7 +359,7 @@
                 {
                     "label": "CRS",
                     "argparser": "",
-                    "description": "A valid CRS identifier (EPSG:25830+5782, EPSG:25830, ...) for replace the internal CRS of layers. Empty for no use",
+                    "description": "A valid CRS identifier, not compound, (EPSG:25830, ...) for replace the internal CRS of layers. Empty for no use",
                     "mandatory": true,
                     "output": false,
                     "value": "EPSG:25830",
@@ -371,6 +431,36 @@
                     "description": "Layers group name, empty for use GPKG base name",
                     "mandatory": true,
                     "output": true,
+                    "value": "",
+                    "type": "string",
+                    "output_format": "{:s}"
+                },
+				{
+                    "label": "Description",
+                    "argparser": "",
+                    "description": "Layer description",
+                    "mandatory": true,
+                    "output": false,
+                    "value": "",
+                    "type": "string",
+                    "output_format": "{:s}"
+                },
+				{
+                    "label": "Layer type",
+                    "argparser": "",
+                    "description": "Layer type: vector, raster, ...",
+                    "mandatory": true,
+                    "output": false,
+                    "value": "",
+                    "type": "string",
+                    "output_format": "{:s}"
+                },
+				{
+                    "label": "Layer style",
+                    "argparser": "",
+                    "description": "Layer style, or empty",
+                    "mandatory": true,
+                    "output": false,
                     "value": "",
                     "type": "string",
                     "output_format": "{:s}"
