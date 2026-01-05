@@ -870,6 +870,12 @@ class PostGISServerAPI():
                                    process,
                                    dialog = None):
         str_error = ''
+        if self.url is None:
+            str_error = 'url is none. Connect before'
+            return str_error
+        if self.token is None:
+            str_error = 'token is none. Connect before'
+            return str_error
         end_date_time = None
         log = None
         if self.current_project_id is None:
@@ -986,6 +992,16 @@ class PostGISServerAPI():
                                         str(i+1), defs_pars.PARAMETER_FIELD_VALUE))
                     return str_error, end_date_time, log
                 field_value = layer[j][defs_pars.PARAMETER_FIELD_VALUE]
+                if field_name.casefold() == defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SOURCE_TAG_DATE.casefold():
+                    date_in_publish_format = field_value[0:4] + '-' + field_value[4:6] + '-' + field_value[6:9]
+                    field_value = date_in_publish_format
+                elif field_name.casefold() == defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SOURCE_TAG_CRS.casefold():
+                    field_value = field_value.replace('EPSG:','')
+                elif field_name.casefold() == defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SOURCE_TAG_TYPE.casefold():
+                    if field_value.casefold() == defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SOURCE_TAG_TYPE_VECTOR.casefold():
+                        field_value = defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_TARGET_TAG_TYPE_VECTOR
+                    elif field_value.casefold() == defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SOURCE_TAG_TYPE_RASTER.casefold():
+                        field_value = defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_TARGET_TAG_TYPE_RASTER
                 field_value_by_source_tag[field_name] = field_value
             publish_layer_content = {}
             for source_tag in defs_processes.process_publish_layer_target_tag_by_source_tag:
@@ -998,7 +1014,6 @@ class PostGISServerAPI():
                 publish_layer_content[target_tag] = field_value_by_source_tag[source_tag]
             publish_layers_content.append(publish_layer_content)
         publish_content_as_dict['layers'] = publish_layers_content
-
 
         # error upload
         # # if exists file in uploads folder, first remove it
@@ -1035,7 +1050,29 @@ class PostGISServerAPI():
         #     return str_error, end_date_time, log
 
         # publicar
-
+        url_post = self.url + defs_server_api.URL_PRODUCT_PUBLISH
+        payload = json.dumps(publish_content_as_dict)
+        headers_as_dict = {}
+        headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_DEFAULT_VALUE
+        headers_as_dict[defs_server_api.HEADERS_TAG_AUTHORIZATION] = (defs_server_api.HEADERS_TAG_AUTHORIZATION_BEARER
+                                                                      + self.token)
+        # headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
+        # headers = json.dumps(headers_as_dict)
+        headers = headers_as_dict
+        response = requests.request("POST", url_post, headers=headers, data=payload)#, data=payload)
+        if response.status_code == 400:
+            str_error = 'post request failed: not found'
+            return str_error
+        response_text_as_dict = json.loads(response.text)
+        if not response.ok:
+            if not defs_server_api.RESPONSE_TEXT_TAG_MESSAGE in response_text_as_dict:
+                str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_MESSAGE)
+                return str_error
+            str_error = 'post request failed: {}'.format(response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_MESSAGE])
+            return str_error
+        if not defs_server_api.RESPONSE_TEXT_TAG_DATA in response_text_as_dict:
+            str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_DATA)
+            return str_error
         end_date_time = datetime.datetime.now()
         return str_error, end_date_time, log
 
