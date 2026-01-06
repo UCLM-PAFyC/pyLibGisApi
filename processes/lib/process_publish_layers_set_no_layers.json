@@ -1,0 +1,201 @@
+{
+    "name": "Publish Layers Set No Layers",
+    "contributions": {
+        "methodology": [
+            "David Hernández López, david.hernandez@uclm.es"
+        ],
+        "software": [
+            "David Hernández López, david.hernandez@uclm.es"
+        ]
+    },
+    "src": {
+        "class": "pyLibGisApi.lib.PostGISServerAPI",
+        "method": "process_publish_layers_set"
+    },
+    "description": "A process to upload layer set",
+    "doc": "",
+    "parameters": [
+        {
+            "label": "Name",
+            "argparser": "",
+            "description": "Name for publish process",
+            "mandatory": true,
+            "output": true,
+            "value": "First publish",
+            "type": "string",
+            "output_format": "{:s}"
+        },
+        {
+            "label": "Layers Set",
+            "argparser": "",
+            "description": "Layers Set, selected layers from a GPKG",
+            "mandatory": true,
+            "output": false,
+            "value": {
+                "file_path": "F:/2025_Inspectia/juanra/example_data/pub_gpkg/Test_with_rasters.gpkg",
+                "layers": []
+            },
+            "type": "layers_set",
+            "file_mode": "read",
+            "domain": [
+                ".gpkg"
+            ],
+            "parameters": [
+                {
+                    "label": "Layer name",
+                    "argparser": "",
+                    "description": "Layer name from GPKG",
+                    "mandatory": true,
+                    "output": false,
+                    "value": "",
+                    "type": "string",
+                    "output_format": "{:s}"
+                },
+                {
+                    "label": "Title",
+                    "argparser": "",
+                    "description": "Layer title",
+                    "mandatory": true,
+                    "output": false,
+                    "value": "",
+                    "type": "string",
+                    "output_format": "{:s}"
+                },
+                {
+                    "label": "Position",
+                    "argparser": "",
+                    "description": "Position in layers set, 0 to ignore",
+                    "mandatory": true,
+                    "output": false,
+                    "value": 0,
+                    "type": "integer",
+                    "domain": [
+                        0,
+                        100
+                    ],
+                    "output_format": "{:10d}"
+                },
+                {
+                    "label": "CRS",
+                    "argparser": "",
+                    "description": "A valid CRS identifier, not compound, (EPSG:25830, ...) for replace the internal CRS of layers. Empty for no use",
+                    "mandatory": true,
+                    "output": false,
+                    "value": "EPSG:25830",
+                    "type": "string",
+                    "output_format": "{:>s}"
+                },
+                {
+                    "label": "Date",
+                    "argparser": "date",
+                    "description": "A valid date in selected format or empty",
+                    "mandatory": true,
+                    "output": false,
+                    "value": "",
+                    "type": "date",
+                    "date_format": "%Y%m%d",
+                    "output_format": "{:>10s}"
+                },
+                {
+                    "label": "Minimum zoom",
+                    "argparser": "",
+                    "description": "Minimum zoom",
+                    "mandatory": true,
+                    "output": false,
+                    "value": 10,
+                    "type": "integer",
+                    "domain": [
+                        1,
+                        25
+                    ],
+                    "output_format": "{:10d}"
+                },
+                {
+                    "label": "Maximum zoom",
+                    "argparser": "",
+                    "description": "Minimum zoom",
+                    "mandatory": true,
+                    "output": false,
+                    "value": 25,
+                    "type": "integer",
+                    "domain": [
+                        1,
+                        25
+                    ],
+                    "output_format": "{:10d}"
+                },
+                {
+                    "label": "Use layer style",
+                    "argparser": "",
+                    "description": "Use layer style, if exists",
+                    "mandatory": true,
+                    "output": false,
+                    "value": true,
+                    "type": "boolean",
+                    "output_format": "{:>10s}"
+                },
+                {
+                    "label": "Visible",
+                    "argparser": "",
+                    "description": "Set visible",
+                    "mandatory": true,
+                    "output": false,
+                    "value": true,
+                    "type": "boolean",
+                    "output_format": "{:>10s}"
+                },
+                {
+                    "label": "Layers group name",
+                    "argparser": "",
+                    "description": "Layers group name, empty for use GPKG base name",
+                    "mandatory": true,
+                    "output": true,
+                    "value": "",
+                    "type": "string",
+                    "output_format": "{:s}"
+                },
+                {
+                    "label": "Description",
+                    "argparser": "",
+                    "description": "Layer description",
+                    "mandatory": true,
+                    "output": false,
+                    "value": "",
+                    "type": "string",
+                    "output_format": "{:s}"
+                },
+                {
+                    "label": "Layer type",
+                    "argparser": "",
+                    "description": "Layer type: vector, raster, ...",
+                    "mandatory": true,
+                    "output": false,
+                    "value": "",
+                    "type": "string",
+                    "output_format": "{:s}"
+                },
+                {
+                    "label": "Layer style",
+                    "argparser": "",
+                    "description": "Layer style, or empty",
+                    "mandatory": true,
+                    "output": false,
+                    "value": "",
+                    "type": "string",
+                    "output_format": "{:s}"
+                }
+            ],
+            "output_format": "{}"
+        },
+        {
+            "label": "Upload folder",
+            "argparser": "",
+            "description": "Upload folder, empty for use GPKG base name",
+            "mandatory": true,
+            "output": true,
+            "value": "test_1/_test_1_1",
+            "type": "string",
+            "output_format": "{:s}"
+        }
+    ]
+}
