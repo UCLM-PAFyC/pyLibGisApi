@@ -15,6 +15,7 @@ from pyLibProcesses.defs import defs_processes as processes_defs_processes
 from pyLibGisApi.defs import defs_server_api
 from pyLibGisApi.defs import defs_processes
 from pyLibParameters import defs_pars
+from pyLibProject.defs import defs_layers_groups as defs_layers_groups
 
 def email_validator(email):
     pattern = (r"^(?!\.)(?!.*\.\.)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+"
@@ -970,6 +971,7 @@ class PostGISServerAPI():
         publish_content_as_dict['project_id'] = self.current_project_id
         publish_content_as_dict['path'] = file_path_in_target_folder
         publish_layers_content = []
+        layers_groups_pos_order = 1
         for i in range(len(layers)):
             layer = layers[i]
             if not isinstance(layer, list):
@@ -1002,6 +1004,45 @@ class PostGISServerAPI():
                         field_value = defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_TARGET_TAG_TYPE_VECTOR
                     elif field_value.casefold() == defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SOURCE_TAG_TYPE_RASTER.casefold():
                         field_value = defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_TARGET_TAG_TYPE_RASTER
+                if field_name.casefold() == defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SOURCE_TAG_GROUP_NAME.casefold():
+                    if field_value:# no empty
+                        str_error = self.get_layers_groups(self.current_project_id)
+                        if str_error:
+                            str_error = ('Process: {}, for project: {}, getting layers groups, error:\n{}'.
+                                        format(name, str(project_id), str_error))
+                            return str_error, end_date_time, log
+                        if not field_value in self.layers_group_id_by_name:
+                            layers_group_as_dict = {}
+                            layers_group_as_dict[defs_layers_groups.LAYERS_GROUP_FIELD_NAME] = field_value
+                            layers_group_as_dict[defs_layers_groups.LAYERS_GROUP_FIELD_DESCRIPTION] = 'From publish product process'
+                            layers_group_as_dict[defs_layers_groups.LAYERS_GROUP_FIELD_VISIBILITY] = True
+                            layers_group_as_dict[defs_layers_groups.LAYERS_GROUP_FIELD_POS_ORDER] = layers_groups_pos_order
+                            layers_groups_pos_order = layers_groups_pos_order + 1
+                            layers_group_as_dict[defs_layers_groups.LAYERS_GROUP_FIELD_MIN_ZOOM] = defs_layers_groups.LAYERS_GROUP_FIELD_MIN_ZOOM_DEFAULT_VALUE
+                            layers_group_as_dict[defs_layers_groups.LAYERS_GROUP_FIELD_MAX_ZOOM] = defs_layers_groups.LAYERS_GROUP_FIELD_MAX_ZOOM_DEFAULT_VALUE
+                            layers_group_as_dict[defs_layers_groups.LAYERS_GROUP_FIELD_OPEN_IN_LAYERS_WITCHER] = True
+                            str_error = self.create_layers_group(self.current_project_id, layers_group_as_dict)
+                            if str_error:
+                                str_error = ('Process: {}, in parameter: {} in layer position: {}'
+                                             '\nmaking layers group: {}\nerror:\n{}'.
+                                             format(name,
+                                                    defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_PARAMETER_LAYERS_SET,
+                                                    str(i + 1), field_value, str_error))
+                                return str_error, end_date_time, log
+                            str_error = self.get_layers_groups(self.current_project_id)
+                            if str_error:
+                                str_error = ('Process: {}, for project: {}, getting layers groups, error:\n{}'.
+                                            format(name, str(project_id), str_error))
+                                return str_error, end_date_time, log
+                        str_error, layer_group_id = self.get_layers_group_id_by_name(self.current_project_id, field_value)
+                        if str_error:
+                            str_error = ('Process: {}, in parameter: {} in layer position: {}'
+                                         '\ngetting layers group id for layer group: {}\nerror:\n{}'.
+                                         format(name,
+                                                defs_processes.PROCESS_FUNCTION_PUBLISH_LAYERS_SET_PARAMETER_LAYERS_SET,
+                                                str(i + 1), field_value, str_error))
+                            return str_error, end_date_time, log
+                        field_value = layer_group_id
                 field_value_by_source_tag[field_name] = field_value
             publish_layer_content = {}
             for source_tag in defs_processes.process_publish_layer_target_tag_by_source_tag:
@@ -1016,38 +1057,37 @@ class PostGISServerAPI():
         publish_content_as_dict['layers'] = publish_layers_content
 
         # error upload
-        # # if exists file in uploads folder, first remove it
-        # if file_basename in files_in_uploads_folder:
-        #     file_path_to_remove = '/' + defs_server_api.UPLOADS_FOLDER + '/' + file_basename
-        #     str_error = self.remove_folder_or_file(self.current_project_id, file_path_to_remove)
-        #     if str_error:
-        #         str_error = ('Process: {}, for project: {}, removing:\n{}\nerror:\n{}'.
-        #                      format(name, str(project_id), file_path_to_remove, str_error))
-        #         return str_error, end_date_time, log
-        # str_error = self.upload_file(self.current_project_id, file_path)
-        # if str_error:
-        #     str_error = ('Process: {}, for project: {}, uploading:\n{}\nerror:\n{}'.
-        #                  format(name, str(project_id), file_path, str_error))
-        #     return str_error, end_date_time, log
+        # if exists file in uploads folder, first remove it
+        if file_basename in files_in_uploads_folder:
+            file_path_to_remove = '/' + defs_server_api.UPLOADS_FOLDER + '/' + file_basename
+            str_error = self.remove_folder_or_file(self.current_project_id, file_path_to_remove)
+            if str_error:
+                str_error = ('Process: {}, for project: {}, removing:\n{}\nerror:\n{}'.
+                             format(name, str(project_id), file_path_to_remove, str_error))
+                return str_error, end_date_time, log
+        str_error = self.upload_file(self.current_project_id, file_path)
+        if str_error:
+            str_error = ('Process: {}, for project: {}, uploading:\n{}\nerror:\n{}'.
+                         format(name, str(project_id), file_path, str_error))
+            return str_error, end_date_time, log
         # error upload
 
-        # # if exists file in target folder, first remove it
-        # if file_basename in files_in_target_folder:
-        #     file_path_to_remove = '/' + upload_folder + '/' + file_basename
-        #     str_error = self.remove_folder_or_file(self.current_project_id, file_path_to_remove)
-        #     if str_error:
-        #         str_error = ('Process: {}, for project: {}, removing:\n{}\nerror:\n{}'.
-        #                      format(name, str(project_id), file_path_to_remove, str_error))
-        #         return str_error, end_date_time, log
-        #
-        # # move file to target folder
-        # str_error = self.move_folder_or_file(self.current_project_id, file_path_in_uploads_folder,
-        #                                      target_folder)
-        # if str_error:
-        #     str_error = ('Process: {}, for project: {}, moving from:\n{}\nto:\n{}\nerror:\n{}'.
-        #                  format(name, str(project_id), file_path_in_uploads_folder,
-        #                         file_path_in_target_folder, str_error))
-        #     return str_error, end_date_time, log
+        # if exists file in target folder, first remove it
+        if file_basename in files_in_target_folder:
+            file_path_to_remove = '/' + upload_folder + '/' + file_basename
+            str_error = self.remove_folder_or_file(self.current_project_id, file_path_to_remove)
+            if str_error:
+                str_error = ('Process: {}, for project: {}, removing:\n{}\nerror:\n{}'.
+                             format(name, str(project_id), file_path_to_remove, str_error))
+                return str_error, end_date_time, log
+        # move file to target folder
+        str_error = self.move_folder_or_file(self.current_project_id, file_path_in_uploads_folder,
+                                             target_folder)
+        if str_error:
+            str_error = ('Process: {}, for project: {}, moving from:\n{}\nto:\n{}\nerror:\n{}'.
+                         format(name, str(project_id), file_path_in_uploads_folder,
+                                file_path_in_target_folder, str_error))
+            return str_error, end_date_time, log
 
         # publicar
         url_post = self.url + defs_server_api.URL_PRODUCT_PUBLISH
@@ -1249,6 +1289,7 @@ class PostGISServerAPI():
         if not isinstance(file_path, str):
             str_error = 'path must be a string'
             return str_error
+        file_basename = os.path.basename(file_path)
         url_post = self.url + defs_server_api.URL_FILE_MANAGER_UPLOADS
         payload_as_dict = {}
         payload_as_dict[defs_server_api.PROJECT_TAG_ID_WITH_PROJECT] = str(project_id)
@@ -1257,12 +1298,12 @@ class PostGISServerAPI():
         # payload_as_dict[defs_server_api.PROJECT_TAG_ID_WITH_PROJECT] = 'project_' + str(project_id)
         # payload = json.dumps(payload_as_dict)
         payload = payload_as_dict
-        # file_path = '/' + file_path
         files = [
-            ('file', ('file', open(file_path, 'rb'), 'application/octet-stream'))
+            # ('file', ('file', open(file_path, 'rb'), 'application/octet-stream'))
+            ('file', (file_basename, open(file_path, 'rb'), 'application/octet-stream'))
         ]
         headers_as_dict = {}
-        headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_UPLOAD_FILE_VALUE
+        # headers_as_dict[defs_server_api.HEADERS_TAG_CONTENT] = defs_server_api.HEADERS_CONTENT_UPLOAD_FILE_VALUE
         headers_as_dict[defs_server_api.HEADERS_TAG_AUTHORIZATION] = (defs_server_api.HEADERS_TAG_AUTHORIZATION_BEARER
                                                                       + self.token)
         # headers_as_dict[defs_server_api.HEADERS_TAG_ACCEPT] = defs_server_api.HEADERS_ACCEPT_DEFAULT_VALUE
@@ -1279,9 +1320,9 @@ class PostGISServerAPI():
                 return str_error
             str_error = 'post request failed: {}'.format(response_text_as_dict[defs_server_api.RESPONSE_TEXT_TAG_MESSAGE])
             return str_error
-        if not defs_server_api.RESPONSE_TEXT_TAG_DATA in response_text_as_dict:
-            str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_DATA)
-            return str_error
+        # if not defs_server_api.RESPONSE_TEXT_TAG_DATA in response_text_as_dict:
+        #     str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_DATA)
+        #     return str_error
         if not response.ok:
             if not defs_server_api.RESPONSE_TEXT_TAG_MESSAGE in response_text_as_dict:
                 str_error = 'Not exists {} tag in response'.format(defs_server_api.RESPONSE_TEXT_TAG_MESSAGE)

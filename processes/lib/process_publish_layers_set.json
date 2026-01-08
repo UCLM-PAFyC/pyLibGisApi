@@ -484,7 +484,7 @@
             "description": "Upload folder, empty for use GPKG base name",
             "mandatory": true,
             "output": true,
-            "value": "test_1/_test_1_1",
+            "value": "test_1/test_1_1",
             "type": "string",
             "output_format": "{:s}"
         }
