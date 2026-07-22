@@ -9,9 +9,6 @@ import re
 from datetime import datetime
 import time
 
-current_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(current_path, '..'))
-
 from pyLibProcesses.defs import defs_processes as processes_defs_processes
 from pyLibGisApi.defs import defs_server_api
 from pyLibGisApi.defs import defs_processes

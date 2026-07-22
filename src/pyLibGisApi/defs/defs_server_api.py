@@ -3,9 +3,6 @@
 import os
 import sys
 
-current_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(current_path, '..'))
-
 RESPONSE_TEXT_TAG_DATA = 'data'
 RESPONSE_TEXT_TAG_MESSAGE = 'message'
 RESPONSE_TEXT_TAG_TOKEN = 'token'
