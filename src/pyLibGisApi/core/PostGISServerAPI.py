@@ -1,7 +1,7 @@
 # authors:
 # David Hernandez Lopez, david.hernandez@uclm.es
 
-import os, sys
+import os
 import requests
 import json
 from urllib.parse import urlparse
@@ -9,11 +9,11 @@ import re
 from datetime import datetime
 import time
 
-from pyLibProcesses.defs import defs_processes as processes_defs_processes
-from pyLibGisApi.defs import defs_server_api
-from pyLibGisApi.defs import defs_processes
+from pyLibProcesses import defs_processes as processes_defs_processes
+from ..defs import defs_server_api
+from ..defs import defs_processes
 from pyLibParameters import defs_pars
-from pyLibProject.defs import defs_layers_groups as defs_layers_groups
+from pyLibProject import defs_layers_groups as defs_layers_groups
 
 def email_validator(email):
     pattern = (r"^(?!\.)(?!.*\.\.)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+"

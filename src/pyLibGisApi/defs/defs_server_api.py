@@ -1,7 +1,5 @@
 # authors:
 # David Hernandez Lopez, david.hernandez@uclm.es
-import os
-import sys
 
 RESPONSE_TEXT_TAG_DATA = 'data'
 RESPONSE_TEXT_TAG_MESSAGE = 'message'

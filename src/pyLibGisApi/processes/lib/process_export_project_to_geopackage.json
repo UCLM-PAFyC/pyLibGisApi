@@ -9,7 +9,7 @@
         ]
     },
     "src": {
-        "class": "pyLibGisApi.lib.PostGISServerAPI",
+        "class": "pyLibGisApi.core.PostGISServerAPI",
         "method": "process_export_project_to_geopackage"
     },
     "description": "A process to export a project to GeoPackage",

@@ -9,7 +9,7 @@
         ]
     },
     "src": {
-        "class": "pyLibGisApi.lib.PostGISServerAPI",
+        "class": "pyLibGisApi.core.PostGISServerAPI",
         "method": "process_publish_layers_set"
     },
     "description": "A process to upload layer set",
